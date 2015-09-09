@@ -1,22 +1,31 @@
 ﻿/* 
-    v0.50
-    
     Space Engineers ship emergency stop script by drNovikov.
-    Saves your ships if you accidentally get out of your cockpit or if you get disconnected from a server. Does not rely on sensors.
-
-    How to use: have a looping timer run a programmable block with this script and also restart itself every second. You can also run the script with the word "manual" as an argument if you want to stop your ship by a quick key, button panel, sensor, timer, etc.
+    v0.51
     
-    Special note: scripts need at least one working cockpit, control station or remote control on a ship in order to enable inertia dampeners. It's a good idea to have a remote control block or another control station hidden away from your main cockpit in case the main one gets destroyed mid-flight.
+    Saves your ships if you accidentally get out of your cockpit or if you get disconnected from a server. 
+    Does not rely on sensors.
 
-    What does it do: as soon as the script detects there is no one in control of the ship or any of its turrets, it enables inertia dampeners, turns on gyroscopes and thrusters, cancels their overrides. Also, turns off gravity generators and artificial masses to prevent them from counteracting the inertia dampener. 
+    How to use: have a looping timer run a programmable block with this script and also restart itself 
+    every second. You can also run the script with the word "manual" as an argument if you want to stop 
+    your ship by a quick key, button panel, sensor, timer, etc. 
+    
+    Additionally, you can place a timer, name it "TriggerOnShipControlLost", and use this timer to set 
+    your own actions that need to be performed when ship control is lost.
+    
+    Special note: scripts need at least one working cockpit, control station or remote control on a ship 
+    in order to enable inertia dampeners. It's a good idea to have a remote control block or another 
+    control station hidden away from your main cockpit in case the main one gets destroyed mid-flight. 
+    If there are several blocks named "TriggerOnShipControlLost", the script will attempt to trigger 
+    only the first one.
 
-    TODO: add a script to turn on a beacon or an antenna.
-    TODO: add a script for power saving, so the lost ship stays working and broadcasting longer.
-    TODO: add a script for auto-piloting a ship to a predefined GPS location.
-    TODO: if possible, change grid name to show GPS, so a player could find it.
-    TODO: detect if there are no working thrusters in a particular direction and rotate a ship accordingly to use its remaining working thrusters.
+    What does it do: as soon as the script detects there is no one in control of the ship or any of its 
+    turrets, it enables inertia dampeners, turns on gyroscopes and thrusters, cancels their overrides. 
+    Also, turns off gravity generators and artificial masses to prevent them from counteracting 
+    the inertia dampener.
 
-    Thanks to Mustardman24 for the idea of enabling inertia dampeners by sensors and his script that I initially used for my ships in conjunction with sensors, and later wrote my own smaller version with a reliable way of detecting loss of control.
+    Thanks to Mustardman24 for the idea of enabling inertia dampeners by sensors and his script that 
+    I initially used for my ships in conjunction with sensors, and later wrote my own smaller version with 
+    a reliable way of detecting loss of control.
 */
 
 void Main(string argument)
@@ -27,6 +36,7 @@ void Main(string argument)
         DisableThrusterOverrides();
         DisableGyroscopeOverrides();
         DisableGravityDrives(); // Comment this out if you don't have any gravity drives.
+        TriggerOnShipControlLost(); // Comment this out if you don't want to trigger the TriggerOnShipControlLost timer.
     }
 }  
  
@@ -59,6 +69,17 @@ bool TurretsAreControlled()
     }
     return false;
 }
+
+// Triggering a timer named "TriggerOnShipControlLost"
+
+void TriggerOnShipControlLost() 
+{     
+    IMyTimerBlock triggerOnShipControlLost = (IMyTimerBlock)GridTerminalSystem.GetBlockWithName("TriggerOnShipControlLost"); 
+    if (triggerOnShipControlLost is IMyTimerBlock) 
+    {
+        triggerOnShipControlLost.GetActionWithName("TriggerNow").Apply(triggerOnShipControlLost); 
+    }
+} 
  
 // drNovikov's gravity drive disabler for large ships with gravity drives
  
